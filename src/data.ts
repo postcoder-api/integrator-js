@@ -4,7 +4,7 @@ const defaultConfig: ConstructorArgs = {
   outputfields: {
     addressline1: "",
   },
-  defaultStyles: true,
+  defaultstyles: true,
   geolocate: false,
   identifier: "Postcoder Integrator",
 };

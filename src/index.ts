@@ -27,7 +27,7 @@ class PostcoderAutocomplete {
     }
 
     // Add default styles if required
-    if (data.config.defaultStyles) {
+    if (data.config.defaultstyles) {
       const style = document.createElement("style");
       style.textContent = defaultStyles;
       document.head.appendChild(style);

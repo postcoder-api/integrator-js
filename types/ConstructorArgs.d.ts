@@ -27,7 +27,7 @@ type ConstructorArgs = {
    * will be added to the page with default styles.
    * @default true
    */
-  defaultStyles?: boolean;
+  defaultstyles?: boolean;
   /**
    * Set to true to use Postcoder's IP to geolocation API to set a country field to the user's country.
    */

@@ -5,7 +5,7 @@ import css from "rollup-plugin-import-css";
 const config = {
   input: "src/index.ts",
   output: {
-    file: "build/index.min.js",
+    file: "build/integrator.min.js",
   },
   plugins: [
     css({ minify: true }),

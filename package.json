@@ -1,6 +1,6 @@
 {
   "name": "integrator-js",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A quick and easy way of setting up Postcoder Autocomplete on any web page.",
   "main": "src/index.ts",
   "scripts": {

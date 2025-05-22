@@ -85,7 +85,7 @@ export const showSuggestions = () => {
         let option = document.createElement("li");
         option.classList.add("postcoder-suggestion");
         option.classList.add("postcoder-facet-back");
-        option.innerHTML = "< Back";
+        option.innerHTML = "↩ Back";
         option.setAttribute("data-type", "BACK");
         option.setAttribute("data-id", "0");
 

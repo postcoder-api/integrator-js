@@ -1,0 +1,26 @@
+{
+  "name": "integrator-js",
+  "version": "1.0.0",
+  "description": "A quick and easy way of setting up Postcoder Address Autocomplete on any web page.",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "start": "concurrently \"rollup -c -w\" \"cd build && serve\""
+  },
+  "author": "Tove Stanley @ Allies Computing Ltd",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.27.2",
+    "@babel/core": "^7.27.1",
+    "@babel/preset-env": "^7.27.2",
+    "@babel/preset-typescript": "^7.27.1",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "concurrently": "^9.1.2",
+    "rollup": "^4.40.2",
+    "rollup-plugin-import-css": "^3.5.8",
+    "serve": "^14.2.4",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.3"
+  }
+}

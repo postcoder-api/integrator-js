@@ -1,0 +1,46 @@
+.postcoder-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.postcoder-wrapper input.postcoder-input {
+  width: 100%;
+}
+
+.postcoder-wrapper ul.postcoder-suggestions-list {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 0;
+  max-height: 400px;
+  overflow-y: auto;
+  width: 100%;
+  z-index: 1000;
+  margin: 0;
+  display: none;
+  list-style-type: none;
+}
+
+.postcoder-wrapper ul.postcoder-suggestions-list li.postcoder-suggestion {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+}
+
+.postcoder-wrapper
+  ul.postcoder-suggestions-list
+  li.postcoder-suggestion.selected {
+  background-color: bisque;
+}
+
+.postcoder-wrapper ul.postcoder-suggestions-list li.postcoder-suggestion:hover {
+  background-color: #ddd;
+}
+
+.postcoder-wrapper ul.postcoder-suggestions-list .postcoder-extra-info {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.postcoder-wrapper ul.postcoder-suggestions-list .postcoder-facet-back {
+  font-weight: bold;
+}

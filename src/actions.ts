@@ -156,7 +156,13 @@ export const retrieve = (id: number | string) => {
 export const getSuggestions = () => {
   data.searchterm = encodeURIComponent(data.input!.value.trim());
 
-  // Require a minimum of three characters
+  // If it has been cleared, completely remove the suggestions
+  if (data.searchterm === "") {
+    newSuggestionsReset();
+    return;
+  }
+
+  // Require a minimum of three characters to perform an address search
   if (data.searchterm.length < 3) {
     hideSuggestions();
     return;

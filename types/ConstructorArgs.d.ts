@@ -103,6 +103,4 @@ type OutputFields = {
    * Leave undefined if the form does not have a separate postcode field.
    */
   postcode?: string;
-} & /**
- * Address lines 2-9
- */ OptionalAddressLines;
+} & OptionalAddressLines;

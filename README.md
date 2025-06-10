@@ -15,7 +15,7 @@ Include the `integrator.min.js` file from the build folder in your HTML:
 Or via CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/postcoder-api/integrator-js@v1/build/integrator.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/postcoder-api/integrator-js@v2/build/integrator.min.js"></script>
 ```
 
 2. **Activate the Library**

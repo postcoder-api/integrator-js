@@ -20,7 +20,7 @@ const data: LibraryProperties = {
   debounce: 0,
   facetselected: false,
   input: null,
-  inputdelay: 300,
+  inputdelay: 50,
   no_results_message: "No addresses found",
   pathfilter: "",
   retrieveEndpoint: "https://ws.postcoder.com/pcw/autocomplete/retrieve",

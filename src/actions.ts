@@ -81,7 +81,6 @@ export const showSuggestions = () => {
         // Don't add it again
         return;
       } else {
-        console.log("Adding back option");
         let option = document.createElement("li");
         option.classList.add("postcoder-suggestion");
         option.classList.add("postcoder-facet-back");

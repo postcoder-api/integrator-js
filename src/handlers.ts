@@ -94,8 +94,12 @@ export const keydown = (event: KeyboardEvent) => {
 export const arrows = (selectedIndex: number) => {
   if (!data.suggestionlist) return;
 
-  // Loop selectedIndex back to first or last result if out of bounds
   let suggestionsCount = data.suggestions.length;
+
+  // Add one to suggestionsCount if the 'Back' button is present
+  if (data.facetselected) {
+    suggestionsCount++;
+  }
 
   if (data.suggestionlist.querySelectorAll("li").length > 0) {
     if (data.selectedIndex >= 0) {
@@ -105,6 +109,7 @@ export const arrows = (selectedIndex: number) => {
         [data.selectedIndex].classList.remove("selected");
     }
 
+    // Loop selectedIndex back to first or last result if out of bounds
     data.selectedIndex =
       ((selectedIndex % suggestionsCount) + suggestionsCount) %
       suggestionsCount;

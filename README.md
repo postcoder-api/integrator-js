@@ -59,6 +59,6 @@ Install the required packages with `npm ci`, and run Rollup and a local developm
 
 ## Documentation
 
-- See [index.html](index.html) for a usage example.
-- Find more documentation for the API at https://postcoder.com/docs
+- See [index.html](https://github.com/postcoder-api/integrator-js/blob/main/build/index.html) for a usage example.
+- Find more documentation at [https://postcoder.com/docs/integrations](https://postcoder.com/docs/integrations)
 - Feel free to [get in touch with us](https://postcoder.com/help-and-support) with any questions.

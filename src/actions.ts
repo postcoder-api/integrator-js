@@ -1,6 +1,9 @@
-import data from "./data";
+import PostcoderAddressAutocomplete from "./index";
 
-export const selectSuggestion = (target: Element) => {
+export function selectSuggestion(
+  this: PostcoderAddressAutocomplete,
+  target: Element
+) {
   const dataTypeAttribute = target.getAttribute("data-type");
   const dataIdAttribute = target.getAttribute("data-id");
 
@@ -8,53 +11,55 @@ export const selectSuggestion = (target: Element) => {
 
   if (dataTypeAttribute === "BACK") {
     // Back to original address
-    data.facetselected = false;
-    data.pathfilter = "";
-    getSuggestions();
+    this.data.facetselected = false;
+    this.data.pathfilter = "";
+    getSuggestions.call(this);
   } else if (dataTypeAttribute === "ADD") {
     // If the type is an address, retrieve it using the id
-    retrieve(dataIdAttribute);
+    retrieve.call(this, dataIdAttribute);
   } else {
     // Get more suggestions, using the id
-    data.pathfilter = dataIdAttribute.toString();
-    data.facetselected = true;
-    getSuggestions();
+    this.data.pathfilter = dataIdAttribute.toString();
+    this.data.facetselected = true;
+    getSuggestions.call(this);
   }
-};
+}
 
 /**
  * Having received suggestions from the API's find method,
  * show them in the suggestions list. Also fired when the search
  * input receives focus.
  */
-export const showSuggestions = () => {
-  if (!data.suggestionlist) {
+export function showSuggestions(this: PostcoderAddressAutocomplete) {
+  if (!this.data.suggestionlist) {
     return;
   }
 
-  data.suggestionlist.style.display = "block";
+  this.data.suggestionlist.style.display = "block";
 
-  if (data.suggestions.length === 0) {
+  if (this.data.suggestions.length === 0) {
     // Show no results message in ul
     let option = document.createElement("li");
     option.classList.add("postcoder-suggestion");
     option.classList.add("postcoder-no-results");
-    option.innerHTML = data.no_results_message;
-    data.suggestionlist.appendChild(option);
-    data.facetselected = false;
-    data.pathfilter = "";
+    option.innerHTML = this.data.no_results_message;
+    this.data.suggestionlist.appendChild(option);
+    this.data.facetselected = false;
+    this.data.pathfilter = "";
   } else {
-    for (let i = 0; i < data.suggestions.length; i++) {
+    for (let i = 0; i < this.data.suggestions.length; i++) {
       let option = document.createElement("li");
       option.classList.add("postcoder-suggestion");
 
       let suggestiontext = "";
 
-      suggestiontext = data.suggestions[i].summaryline;
+      suggestiontext = this.data.suggestions[i].summaryline;
 
-      if (data.suggestions[i].count > 1) {
+      if (this.data.suggestions[i].count > 1) {
         let count =
-          data.suggestions[i].count > 100 ? "100+" : data.suggestions[i].count;
+          this.data.suggestions[i].count > 100
+            ? "100+"
+            : this.data.suggestions[i].count;
 
         suggestiontext +=
           ' <span class="postcoder-extra-info">(' +
@@ -65,16 +70,16 @@ export const showSuggestions = () => {
       option.innerHTML = suggestiontext;
 
       // Add the id and type attibutes to the option
-      option.setAttribute("data-id", data.suggestions[i].id);
-      option.setAttribute("data-type", data.suggestions[i].type);
+      option.setAttribute("data-id", this.data.suggestions[i].id);
+      option.setAttribute("data-type", this.data.suggestions[i].type);
 
-      data.suggestionlist!.appendChild(option);
+      this.data.suggestionlist!.appendChild(option);
     }
 
     // If a facet is selected, have an option to go back at the top of the list
-    if (data.facetselected) {
+    if (this.data.facetselected) {
       // Check if the back option already exists
-      let backOption = data.suggestionlist.querySelector(
+      let backOption = this.data.suggestionlist.querySelector(
         'li[data-type="BACK"]'
       );
       if (backOption) {
@@ -89,39 +94,42 @@ export const showSuggestions = () => {
         option.setAttribute("data-id", "0");
 
         // Add to start of the list
-        data.suggestionlist!.insertBefore(
+        this.data.suggestionlist!.insertBefore(
           option,
-          data.suggestionlist!.firstChild
+          this.data.suggestionlist!.firstChild
         );
       }
     }
   }
-};
+}
 
 /**
  * When we've selected a suggestion from the FIND endpoint,
  * go to the RETRIEVE endpoint to get the full address details
  * @param id
  */
-export const retrieve = (id: number | string) => {
-  const country = getCountry();
+export function retrieve(
+  this: PostcoderAddressAutocomplete,
+  id: number | string
+) {
+  const country = getCountry.call(this);
 
   const url =
-    data.retrieveEndpoint +
+    this.data.retrieveEndpoint +
     "?apikey=" +
-    data.apikey +
+    this.data.apikey +
     "&country=" +
     country +
     "&query=" +
-    data.searchterm +
+    this.data.searchterm +
     "&id=" +
     id +
     "&lines=" +
-    data.addresslines +
+    this.data.addresslines +
     "&identifier=" +
-    encodeURIComponent(data.config.identifier) +
+    encodeURIComponent(this.data.config.identifier) +
     "&exclude=" +
-    excludeFields();
+    excludeFields.call(this);
 
   // Fetch the json formatted result from Postcoder and pass it to processResult
   fetch(url)
@@ -133,7 +141,7 @@ export const retrieve = (id: number | string) => {
     })
     .then((addresses) => {
       // Always one result, use the first array item
-      processResult(addresses[0]);
+      processResult.call(this, addresses[0]);
     })
     .catch((err) => {
       if (typeof err.text === "function") {
@@ -146,59 +154,59 @@ export const retrieve = (id: number | string) => {
         console.log(err);
       }
     });
-};
+}
 
 /**
  * When we have a search term to go on,
  * get suggestions from the FIND endpoint.
  */
-export const getSuggestions = () => {
-  data.searchterm = encodeURIComponent(data.input!.value.trim());
+export function getSuggestions(this: PostcoderAddressAutocomplete) {
+  this.data.searchterm = encodeURIComponent(this.data.input!.value.trim());
 
   // If it has been cleared, completely remove the suggestions
-  if (data.searchterm === "") {
-    newSuggestionsReset();
+  if (this.data.searchterm === "") {
+    newSuggestionsReset.call(this);
     return;
   }
 
   // Require a minimum of three characters to perform an address search
-  if (data.searchterm.length < 3) {
-    hideSuggestions();
+  if (this.data.searchterm.length < 3) {
+    hideSuggestions.call(this);
     return;
   }
 
   let url =
-    data.suggestionEndpoint +
+    this.data.suggestionEndpoint +
     "?apikey=" +
-    data.apikey +
+    this.data.apikey +
     "&country=" +
-    getCountry() +
+    getCountry.call(this) +
     "&singlesummary=true" +
     "&query=" +
-    data.searchterm;
+    this.data.searchterm;
 
-  if (data.pathfilter) {
-    url += "&pathfilter=" + encodeURIComponent(data.pathfilter);
+  if (this.data.pathfilter) {
+    url += "&pathfilter=" + encodeURIComponent(this.data.pathfilter);
   }
 
-  if (data.config.usercategory) {
-    url += "&usercategory=" + data.config.usercategory;
+  if (this.data.config.usercategory) {
+    url += "&usercategory=" + this.data.config.usercategory;
   }
 
-  if (data.config.postcode) {
-    url += "&postcode=" + data.config.postcode;
+  if (this.data.config.postcode) {
+    url += "&postcode=" + this.data.config.postcode;
   }
 
-  if (data.config.enablefacets) {
-    url += "&enablefacets=" + data.config.enablefacets;
+  if (this.data.config.enablefacets) {
+    url += "&enablefacets=" + this.data.config.enablefacets;
   }
 
-  if (data.config.maximumresults) {
-    url += "&maximumresults=" + data.config.maximumresults;
+  if (this.data.config.maximumresults) {
+    url += "&maximumresults=" + this.data.config.maximumresults;
   }
 
-  data.abortController = new AbortController();
-  fetch(url, { signal: data.abortController.signal })
+  this.data.abortController = new AbortController();
+  fetch(url, { signal: this.data.abortController.signal })
     .then((response) => {
       if (!response.ok) {
         throw response;
@@ -207,10 +215,10 @@ export const getSuggestions = () => {
     })
     .then((json) => {
       // Clear old suggestions
-      newSuggestionsReset();
+      newSuggestionsReset.call(this);
       // Add new ones
-      data.suggestions = json;
-      showSuggestions();
+      this.data.suggestions = json;
+      showSuggestions.call(this);
     })
     .catch((err) => {
       if (typeof err.text === "function") {
@@ -223,48 +231,48 @@ export const getSuggestions = () => {
         console.log(err);
       }
     });
-};
+}
 
 /**
  * Hide the suggestions list, for use when clicking
  * away from the input field for example
  */
-export const hideSuggestions = () => {
-  if (!data.suggestionlist) return;
+export function hideSuggestions(this: PostcoderAddressAutocomplete) {
+  if (!this.data.suggestionlist) return;
   // Clear the ul list
-  data.suggestionlist.innerHTML = "";
+  this.data.suggestionlist.innerHTML = "";
   // Hide it
-  data.suggestionlist.style.display = "none";
-};
+  this.data.suggestionlist.style.display = "none";
+}
 
 /**
  * Removes the previous suggestions and resets the suggestions list.
  */
-export const newSuggestionsReset = () => {
+export function newSuggestionsReset(this: PostcoderAddressAutocomplete) {
   // Hide the list while we work on it
-  hideSuggestions();
+  hideSuggestions.call(this);
   // Clear the filter we would pass to RETRIEVE if a selection is made
-  data.pathfilter = "";
+  this.data.pathfilter = "";
   // Clear the list
-  data.suggestions = [];
+  this.data.suggestions = [];
   // Scroll to top
-  data.suggestionlist!.scrollTop = 0;
+  this.data.suggestionlist!.scrollTop = 0;
   // Reset the index for the arrow key navigation
-  data.selectedIndex = -1;
-};
+  this.data.selectedIndex = -1;
+}
 
 /**
  * Gets a country code to use for the address search, whether
  * that is from the config object or from the country selector.
  */
-export const getCountry = (): string => {
+export function getCountry(this: PostcoderAddressAutocomplete): string {
   // If the countrycode is provided via config object, use that.
   // If not, use html input
-  return typeof data.config.countrycode !== "undefined" &&
-    data.config.countrycode !== ""
-    ? data.config.countrycode
-    : data.countrySelectorElement!.value;
-};
+  return typeof this.data.config.countrycode !== "undefined" &&
+    this.data.config.countrycode !== ""
+    ? this.data.config.countrycode
+    : this.data.countrySelectorElement!.value;
+}
 
 /**
  * After an address suggestion has been selected and the full address
@@ -272,10 +280,13 @@ export const getCountry = (): string => {
  * address details.
  * @param address The full address object returned from RETRIEVE
  */
-export const processResult = (address: any) => {
-  hideSuggestions();
-  data.facetselected = false;
-  newSuggestionsReset();
+export function processResult(
+  this: PostcoderAddressAutocomplete,
+  address: any
+) {
+  hideSuggestions.call(this);
+  this.data.facetselected = false;
+  newSuggestionsReset.call(this);
 
   let possibleFields = [
     "organisation",
@@ -296,7 +307,7 @@ export const processResult = (address: any) => {
   // Populate the address form
   for (let i = 0; i < possibleFields.length; i++) {
     // See what selectors have been provided
-    let field_selector = data.config.outputfields[possibleFields[i]];
+    let field_selector = this.data.config.outputfields[possibleFields[i]];
 
     // If it's a string, try and use it to find the element
     if (typeof field_selector == "string" && field_selector !== "") {
@@ -311,14 +322,14 @@ export const processResult = (address: any) => {
       }
     }
   }
-};
+}
 
 /**
  * Use Postcoder's ipaddress endpoint to pre-select the country list
  */
-export const preselectCountry = () => {
-  if (data.config.geolocate) {
-    fetch("https://ws.postcoder.com/pcw/" + data.apikey + "/ipaddress")
+export function preselectCountry(this: PostcoderAddressAutocomplete) {
+  if (this.data.config.geolocate) {
+    fetch("https://ws.postcoder.com/pcw/" + this.data.apikey + "/ipaddress")
       .then((response) => {
         if (!response.ok) {
           throw response;
@@ -327,7 +338,7 @@ export const preselectCountry = () => {
       })
       .then((json) => {
         // Make our selection
-        data.countrySelectorElement!.value = json.countrycode;
+        this.data.countrySelectorElement!.value = json.countrycode;
       })
       .catch((err) => {
         if (typeof err.text === "function") {
@@ -344,20 +355,20 @@ export const preselectCountry = () => {
         }
       });
   }
-};
+}
 
 /**
  * Return a comma separated list of fields to exclude from the RETRIEVE endpoint.
  * This is used to exclude fields from the addresslines outputs; for example
  * where you have your own organisation field.
  */
-const excludeFields = (): string => {
+function excludeFields(this: PostcoderAddressAutocomplete): string {
   // If an organisation field is provided in the constructor, don't include it in the addresslines
-  const organisationField = data.config.outputfields["organisation"];
+  const organisationField = this.data.config.outputfields["organisation"];
 
   if (organisationField === "" || organisationField === undefined) {
     return "posttown,county,postcode,country";
   } else {
     return "organisation,posttown,county,postcode,country";
   }
-};
+}

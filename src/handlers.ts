@@ -1,10 +1,11 @@
-import data from "./data";
 import {
   hideSuggestions,
   selectSuggestion,
   getSuggestions,
   showSuggestions,
 } from "./actions";
+
+import PostcoderAddressAutocomplete from "./index";
 
 /**
  * What should be done if a suggested address is clicked?
@@ -13,7 +14,10 @@ import {
  * @param event Event
  * @returns void
  */
-export const suggestionClick = (event: Event) => {
+export function suggestionClick(
+  this: PostcoderAddressAutocomplete,
+  event: Event
+) {
   event.stopPropagation();
 
   if (event.target == null || !(event.target instanceof Element)) {
@@ -28,27 +32,34 @@ export const suggestionClick = (event: Event) => {
     }
   }
 
-  selectSuggestion(target);
-};
+  selectSuggestion.call(this, target);
+}
 
 /**
  * Handle clicks on the document
  * @param event
  */
-export const documentClick = (event: MouseEvent) => {
+export function documentClick(
+  this: PostcoderAddressAutocomplete,
+  event: MouseEvent
+) {
   if (!event.target) return;
+
   if (
-    data.suggestionlist!.contains(event.target as Node) ||
-    data.input!.contains(event.target as Node)
+    this.data.suggestionlist!.contains(event.target as Node) ||
+    this.data.input!.contains(event.target as Node)
   ) {
     return;
   }
 
-  hideSuggestions();
-};
+  hideSuggestions.call(this);
+}
 
-export const keydown = (event: KeyboardEvent) => {
-  if (!data.suggestionlist) return;
+export function keydown(
+  this: PostcoderAddressAutocomplete,
+  event: KeyboardEvent
+) {
+  if (!this.data.suggestionlist) return;
   const { key } = event;
 
   switch (key) {
@@ -58,109 +69,114 @@ export const keydown = (event: KeyboardEvent) => {
     case "ArrowDown": {
       const selectedIndex =
         key === "ArrowUp" || key === "Up"
-          ? data.selectedIndex - 1
-          : data.selectedIndex + 1;
+          ? this.data.selectedIndex - 1
+          : this.data.selectedIndex + 1;
       event.preventDefault();
-      arrows(selectedIndex);
+      arrows.call(this, selectedIndex);
       break;
     }
     case "Tab": {
-      tab(event);
+      tab.call(this, event);
       break;
     }
     case "Enter": {
-      selectSuggestion(
-        data.suggestionlist.querySelectorAll("li")[data.selectedIndex]
+      selectSuggestion.call(
+        this,
+        this.data.suggestionlist.querySelectorAll("li")[this.data.selectedIndex]
       );
       break;
     }
     case "Esc":
     case "Escape": {
-      hideSuggestions();
+      hideSuggestions.call(this);
       break;
     }
     default:
       // All other keys (i.e. typing more)
-      data.facetselected = false;
-      data.pathfilter = "";
+      this.data.facetselected = false;
+      this.data.pathfilter = "";
       return;
   }
-};
+}
 
 /**
  * Handle arrow key navigation
  * @param selectedIndex
  */
-export const arrows = (selectedIndex: number) => {
-  if (!data.suggestionlist) return;
+function arrows(this: PostcoderAddressAutocomplete, selectedIndex: number) {
+  if (!this.data.suggestionlist) return;
 
-  let suggestionsCount = data.suggestions.length;
+  let suggestionsCount = this.data.suggestions.length;
 
   // Add one to suggestionsCount if the 'Back' button is present
-  if (data.facetselected) {
+  if (this.data.facetselected) {
     suggestionsCount++;
   }
 
-  if (data.suggestionlist.querySelectorAll("li").length > 0) {
-    if (data.selectedIndex >= 0) {
+  if (this.data.suggestionlist.querySelectorAll("li").length > 0) {
+    if (this.data.selectedIndex >= 0) {
       // Clear the previously selected class
-      data.suggestionlist
+      this.data.suggestionlist
         .querySelectorAll("li")
-        [data.selectedIndex].classList.remove("selected");
+        [this.data.selectedIndex].classList.remove("selected");
     }
 
     // Loop selectedIndex back to first or last result if out of bounds
-    data.selectedIndex =
+    this.data.selectedIndex =
       ((selectedIndex % suggestionsCount) + suggestionsCount) %
       suggestionsCount;
 
     // Set the selected class
-    data.suggestionlist
+    this.data.suggestionlist
       .querySelectorAll("li")
-      [data.selectedIndex].classList.add("selected");
+      [this.data.selectedIndex].classList.add("selected");
 
     // Scroll into view
-    data.suggestionlist
+    this.data.suggestionlist
       .querySelectorAll("li")
-      [data.selectedIndex].scrollIntoView(false);
+      [this.data.selectedIndex].scrollIntoView(false);
   }
-};
+}
 
 /**
  * Handle tab key navigation
  * @param event
  */
-export const tab = (event: KeyboardEvent) => {
-  if (data.selectedIndex >= 0) {
+export function tab(this: PostcoderAddressAutocomplete, event: KeyboardEvent) {
+  if (this.data.selectedIndex >= 0) {
     event.preventDefault();
-    selectSuggestion(
-      data.suggestionlist!.querySelectorAll("li")[data.selectedIndex]
+    selectSuggestion.call(
+      this,
+      this.data.suggestionlist!.querySelectorAll("li")[this.data.selectedIndex]
     );
   } else {
-    hideSuggestions();
+    hideSuggestions.call(this);
   }
-};
+}
 
 /**
  * Handle the search box receiving new inputs
  */
-export const input = () => {
-  clearTimeout(data.debounce);
-  if (data.abortController !== null) {
-    data.abortController.abort(
+export function input(this: PostcoderAddressAutocomplete) {
+  clearTimeout(this.data.debounce);
+  if (this.data.abortController !== null) {
+    this.data.abortController.abort(
       "Aborted a request to Postcoder because new input was detected."
     );
   }
-  data.debounce = setTimeout(() => getSuggestions(), data.inputdelay);
-};
+  this.data.debounce = setTimeout(
+    () => getSuggestions.call(this),
+    this.data.inputdelay
+  );
+}
 
 /**
  * Handle the search box receiving focus
  */
-export const focus = () => {
-  if (data.suggestions.length > 0) {
-    showSuggestions();
+export function focus(this: PostcoderAddressAutocomplete) {
+  if (this.data.suggestions.length > 0) {
+    showSuggestions.call(this);
   } else {
-    getSuggestions();
+    getSuggestions.call(this);
   }
-};
+}

@@ -9,7 +9,7 @@ const defaultConfig: ConstructorArgs = {
   identifier: "Postcoder Integrator",
 };
 
-const data: LibraryProperties = {
+const initialData: LibraryProperties = {
   abortController: null,
   addresslines: 0,
   apikey: "",
@@ -32,4 +32,4 @@ const data: LibraryProperties = {
   suggestions: [],
 };
 
-export default data;
+export default initialData;

@@ -91,6 +91,14 @@ class PostcoderAddressAutocomplete {
       }
     }
 
+    // If we are working with a country selector...
+    if (this.data.countrySelectorElement) {
+      // Add a change listener
+      this.data.countrySelectorElement.addEventListener("change", () => {
+        return handlers.countryChange.call(this);
+      });
+    }
+
     // Build the suggestions list; where we're going to put Find results
     this.setupSuggestionsList();
 

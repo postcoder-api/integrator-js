@@ -3,6 +3,7 @@ import {
   selectSuggestion,
   getSuggestions,
   showSuggestions,
+  newSuggestionsReset,
 } from "./actions";
 
 import PostcoderAddressAutocomplete from "./index";
@@ -169,6 +170,18 @@ export function input(this: PostcoderAddressAutocomplete) {
     () => getSuggestions.call(this),
     this.data.inputdelay
   );
+}
+
+/**
+ * When country selector is changed, disregard any results
+ * from the previous country and refresh with the new.
+ */
+export function countryChange(this: PostcoderAddressAutocomplete) {
+  clearTimeout(this.data.debounce);
+  this.data.abortController?.abort();
+  this.data.facetselected = false;
+  newSuggestionsReset.call(this);
+  // getSuggestions.call(this);
 }
 
 /**

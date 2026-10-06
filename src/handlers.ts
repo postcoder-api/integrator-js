@@ -80,6 +80,7 @@ export function keydown(
       break;
     }
     case "Enter": {
+      if (this.data.selectedIndex < 0) break;
       selectSuggestion.call(
         this,
         this.data.suggestionlist.querySelectorAll("li")[this.data.selectedIndex]

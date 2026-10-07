@@ -36,20 +36,29 @@ export function showSuggestions(this: PostcoderAddressAutocomplete) {
   }
 
   this.data.suggestionlist.style.display = "block";
+  this.data.suggestionlist.innerHTML = "";
+  this.data.selectedIndex = -1;
+  this.data.input!.removeAttribute("aria-activedescendant");
+  this.data.input!.setAttribute("aria-expanded", "true");
 
   if (this.data.suggestions.length === 0) {
     // Show no results message in ul
     let option = document.createElement("li");
     option.classList.add("postcoder-suggestion");
     option.classList.add("postcoder-no-results");
+    option.setAttribute("role", "presentation");
     option.innerHTML = this.data.no_results_message;
     this.data.suggestionlist.appendChild(option);
     this.data.facetselected = false;
     this.data.pathfilter = "";
+    announce.call(this, this.data.no_results_message);
   } else {
     for (let i = 0; i < this.data.suggestions.length; i++) {
       let option = document.createElement("li");
       option.classList.add("postcoder-suggestion");
+      option.id = this.data.suggestionlist.id + "-option-" + i;
+      option.setAttribute("role", "option");
+      option.setAttribute("aria-selected", "false");
 
       let suggestiontext = "";
 
@@ -89,6 +98,10 @@ export function showSuggestions(this: PostcoderAddressAutocomplete) {
         let option = document.createElement("li");
         option.classList.add("postcoder-suggestion");
         option.classList.add("postcoder-facet-back");
+        option.id = this.data.suggestionlist.id + "-back";
+        option.setAttribute("role", "option");
+        option.setAttribute("aria-selected", "false");
+        option.setAttribute("aria-label", "Back to all address suggestions");
         option.innerHTML = "↩ Back";
         option.setAttribute("data-type", "BACK");
         option.setAttribute("data-id", "0");
@@ -100,6 +113,11 @@ export function showSuggestions(this: PostcoderAddressAutocomplete) {
         );
       }
     }
+    const count = this.data.suggestions.length;
+    announce.call(
+      this,
+      count + " address suggestion" + (count === 1 ? "" : "s") + " available."
+    );
   }
 }
 
@@ -112,6 +130,7 @@ export function retrieve(
   this: PostcoderAddressAutocomplete,
   id: number | string
 ) {
+  announce.call(this, "Retrieving address.");
   const country = getCountry.call(this);
 
   const url =
@@ -144,6 +163,10 @@ export function retrieve(
       processResult.call(this, addresses[0]);
     })
     .catch((err) => {
+      announce.call(
+        this,
+        "The address could not be loaded. Please enter it manually or try again."
+      );
       if (typeof err.text === "function") {
         err.text().then((errorMessage: string) => {
           console.log(
@@ -161,6 +184,7 @@ export function retrieve(
  * get suggestions from the FIND endpoint.
  */
 export function getSuggestions(this: PostcoderAddressAutocomplete) {
+  announce.call(this, "");
   this.data.searchterm = encodeURIComponent(this.data.input!.value.trim());
 
   // If it has been cleared, completely remove the suggestions
@@ -205,8 +229,10 @@ export function getSuggestions(this: PostcoderAddressAutocomplete) {
     url += "&maximumresults=" + this.data.config.maximumresults;
   }
 
-  this.data.abortController = new AbortController();
-  fetch(url, { signal: this.data.abortController.signal })
+  const controller = new AbortController();
+  this.data.abortController = controller;
+  announce.call(this, "Searching for addresses.");
+  fetch(url, { signal: controller.signal })
     .then((response) => {
       if (!response.ok) {
         throw response;
@@ -214,6 +240,8 @@ export function getSuggestions(this: PostcoderAddressAutocomplete) {
       return response.json();
     })
     .then((json) => {
+      if (controller.signal.aborted) return;
+      this.data.abortController = null;
       // Clear old suggestions
       newSuggestionsReset.call(this);
       // Add new ones
@@ -221,6 +249,12 @@ export function getSuggestions(this: PostcoderAddressAutocomplete) {
       showSuggestions.call(this);
     })
     .catch((err) => {
+      if (controller.signal.aborted) return;
+      this.data.abortController = null;
+      announce.call(
+        this,
+        "Address search is unavailable. Please enter your address manually or try again."
+      );
       if (typeof err.text === "function") {
         err.text().then((errorMessage: string) => {
           console.log(
@@ -238,6 +272,13 @@ export function getSuggestions(this: PostcoderAddressAutocomplete) {
  * away from the input field for example
  */
 export function hideSuggestions(this: PostcoderAddressAutocomplete) {
+  clearTimeout(this.data.debounce);
+  this.data.debounce = 0;
+  this.data.abortController?.abort();
+  this.data.abortController = null;
+  this.data.selectedIndex = -1;
+  this.data.input?.setAttribute("aria-expanded", "false");
+  this.data.input?.removeAttribute("aria-activedescendant");
   if (!this.data.suggestionlist) return;
   // Clear the ul list
   this.data.suggestionlist.innerHTML = "";
@@ -322,6 +363,7 @@ export function processResult(
       }
     }
   }
+  announce.call(this, "Address selected. Address fields have been filled.");
 }
 
 /**
@@ -371,4 +413,11 @@ function excludeFields(this: PostcoderAddressAutocomplete): string {
   } else {
     return "organisation,posttown,county,postcode,country";
   }
+}
+
+/**
+ * Populate the aria-live region with a status update for screen readers.
+ */
+function announce(this: PostcoderAddressAutocomplete, message: string) {
+  if (this.data.statusRegion) this.data.statusRegion.textContent = message;
 }

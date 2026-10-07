@@ -109,6 +109,7 @@ function arrows(this: PostcoderAddressAutocomplete, selectedIndex: number) {
   if (!this.data.suggestionlist) return;
 
   let suggestionsCount = this.data.suggestions.length;
+  const options = this.data.suggestionlist.querySelectorAll("li");
 
   // Add one to suggestionsCount if the 'Back' button is present
   if (this.data.facetselected) {
@@ -117,10 +118,9 @@ function arrows(this: PostcoderAddressAutocomplete, selectedIndex: number) {
 
   if (this.data.suggestionlist.querySelectorAll("li").length > 0) {
     if (this.data.selectedIndex >= 0) {
-      // Clear the previously selected class
-      this.data.suggestionlist
-        .querySelectorAll("li")
-        [this.data.selectedIndex].classList.remove("selected");
+      // Clear the previous selection
+      options[this.data.selectedIndex].classList.remove("selected");
+      options[this.data.selectedIndex].setAttribute("aria-selected", "false");
     }
 
     // Loop selectedIndex back to first or last result if out of bounds
@@ -128,15 +128,14 @@ function arrows(this: PostcoderAddressAutocomplete, selectedIndex: number) {
       ((selectedIndex % suggestionsCount) + suggestionsCount) %
       suggestionsCount;
 
-    // Set the selected class
-    this.data.suggestionlist
-      .querySelectorAll("li")
-      [this.data.selectedIndex].classList.add("selected");
+    // Set the selection
+    const selected = options[this.data.selectedIndex];
+    selected.classList.add("selected");
+    selected.setAttribute("aria-selected", "true");
+    this.data.input!.setAttribute("aria-activedescendant", selected.id);
 
     // Scroll into view
-    this.data.suggestionlist
-      .querySelectorAll("li")
-      [this.data.selectedIndex].scrollIntoView(false);
+    selected.scrollIntoView(false);
   }
 }
 
@@ -160,12 +159,7 @@ export function tab(this: PostcoderAddressAutocomplete, event: KeyboardEvent) {
  * Handle the search box receiving new inputs
  */
 export function input(this: PostcoderAddressAutocomplete) {
-  clearTimeout(this.data.debounce);
-  if (this.data.abortController !== null) {
-    this.data.abortController.abort(
-      "Aborted a request to Postcoder because new input was detected."
-    );
-  }
+  newSuggestionsReset.call(this);
   this.data.debounce = setTimeout(
     () => getSuggestions.call(this),
     this.data.inputdelay

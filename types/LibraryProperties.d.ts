@@ -61,6 +61,8 @@ interface LibraryProperties {
   debounce: number;
   /** The element where we will display suggestions from the FIND endpoint. */
   suggestionlist: HTMLElement | null;
+  /** Live region for address lookup feedback. */
+  statusRegion: HTMLElement | null;
   /** The array of suggestions from the FIND endpoint. */
   suggestions: any[];
   /**

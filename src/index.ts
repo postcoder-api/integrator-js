@@ -59,6 +59,11 @@ class PostcoderAddressAutocomplete {
     this.data.input.setAttribute("autocapitalize", "off");
     this.data.input.setAttribute("autocorrect", "off");
     this.data.input.setAttribute("spellcheck", "false");
+    this.data.input.setAttribute("role", "combobox");
+    this.data.input.setAttribute("aria-autocomplete", "list");
+    this.data.input.setAttribute("aria-haspopup", "listbox");
+    this.data.input.setAttribute("aria-expanded", "false");
+    this.data.input.removeAttribute("aria-activedescendant");
 
     // Add event listeners to the input element
     this.data.input.addEventListener("input", () => {
@@ -120,9 +125,54 @@ class PostcoderAddressAutocomplete {
 
     const suggestionsElement = document.createElement("ul");
 
-    // Add id related to the search input for these suggestions
-    suggestionsElement.id =
-      "postcoder-suggestions-list-" + this.data.config.searchinput;
+    suggestionsElement.id = this.data.input.id + "-postcoder-suggestions-list";
+    suggestionsElement.setAttribute("role", "listbox");
+    suggestionsElement.setAttribute("aria-label", "Address suggestions");
+
+    /**
+     * The input element aria-controls our suggestions list.
+     * But: it might aria-control something else on the page, too.
+     * Respect that, if present.
+     */
+    const existingControls = this.data.input
+      .getAttribute("aria-controls")
+      ?.trim();
+    this.data.input.setAttribute(
+      "aria-controls",
+      existingControls
+        ? existingControls + " " + suggestionsElement.id
+        : suggestionsElement.id
+    );
+
+    // Set up an aria-live screen-reader only element for announcements of changes
+    const status = document.createElement("div");
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    status.setAttribute("aria-atomic", "true");
+    status.style.cssText =
+      "position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;";
+    this.data.statusRegion = status;
+
+    // Associate static keyboard guidance with the input, preserving existing descriptions.
+    const keyboardHint = document.createElement("div");
+    keyboardHint.id = this.data.input.id + "-postcoder-keyboard-hint";
+    keyboardHint.textContent =
+      "Start typing, then use the up and down arrow keys to browse suggestions and press Enter to select. Press Escape to close suggestions.";
+    keyboardHint.style.cssText = status.style.cssText;
+
+    /**
+     * Same as aria-control; the input might have other aria-describedby
+     * details somewhere else that we should respect.
+     */
+    const existingDescription = this.data.input
+      .getAttribute("aria-describedby")
+      ?.trim();
+    this.data.input.setAttribute(
+      "aria-describedby",
+      existingDescription
+        ? existingDescription + " " + keyboardHint.id
+        : keyboardHint.id
+    );
 
     // Class for styling
     suggestionsElement.classList.add("postcoder-suggestions-list");
@@ -141,8 +191,10 @@ class PostcoderAddressAutocomplete {
     );
     wrapper.appendChild(this.data.input);
 
-    // Put the suggestions in there with the input
+    // Put the suggestions, keyboard hint & aria-live region in the wrapper with the input
     wrapper.appendChild(suggestionsElement);
+    wrapper.appendChild(keyboardHint);
+    wrapper.appendChild(status);
 
     // Add click event listener to the document, to hide the suggestions when clicked away
     document.body.addEventListener("click", (e: MouseEvent) => {

@@ -29,6 +29,7 @@ const initialData: LibraryProperties = {
   selectedIndex: -1,
   suggestionEndpoint: "https://ws.postcoder.com/pcw/autocomplete/find",
   suggestionlist: null,
+  statusRegion: null,
   suggestions: [],
 };
 

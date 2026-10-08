@@ -16,6 +16,7 @@ const initialData: LibraryProperties = {
   config: {
     ...defaultConfig,
   },
+  completionRegion: null,
   countrySelectorElement: null,
   debounce: 0,
   facetselected: false,

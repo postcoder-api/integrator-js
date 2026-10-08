@@ -130,7 +130,7 @@ export function retrieve(
   this: PostcoderAddressAutocomplete,
   id: number | string
 ) {
-  announce.call(this, "Retrieving address.");
+  announce.call(this, "", this.data.completionRegion);
   const country = getCountry.call(this);
 
   const url =
@@ -184,6 +184,7 @@ export function retrieve(
  * get suggestions from the FIND endpoint.
  */
 export function getSuggestions(this: PostcoderAddressAutocomplete) {
+  announce.call(this, "", this.data.completionRegion);
   announce.call(this, "");
   this.data.searchterm = encodeURIComponent(this.data.input!.value.trim());
 
@@ -325,10 +326,6 @@ export function processResult(
   this: PostcoderAddressAutocomplete,
   address: any
 ) {
-  hideSuggestions.call(this);
-  this.data.facetselected = false;
-  newSuggestionsReset.call(this);
-
   let possibleFields = [
     "organisation",
     "addressline1",
@@ -363,7 +360,15 @@ export function processResult(
       }
     }
   }
-  announce.call(this, "Address selected. Address fields have been filled.");
+  this.data.facetselected = false;
+  newSuggestionsReset.call(this);
+
+  announce.call(this, "");
+  announce.call(
+    this,
+    "Address selected. Address fields have been filled.",
+    this.data.completionRegion
+  );
 }
 
 /**
@@ -416,8 +421,12 @@ function excludeFields(this: PostcoderAddressAutocomplete): string {
 }
 
 /**
- * Populate the aria-live region with a status update for screen readers.
+ * Populate an aria-live region with a status update for screen readers.
  */
-function announce(this: PostcoderAddressAutocomplete, message: string) {
-  if (this.data.statusRegion) this.data.statusRegion.textContent = message;
+function announce(
+  this: PostcoderAddressAutocomplete,
+  message: string,
+  region = this.data.statusRegion
+) {
+  if (region) region.textContent = message;
 }

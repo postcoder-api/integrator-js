@@ -153,9 +153,18 @@ class PostcoderAddressAutocomplete {
       "position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;";
     this.data.statusRegion = status;
 
+    // Keep completion feedback separate from routine search updates.
+    const completion = document.createElement("div");
+    completion.setAttribute("aria-live", "assertive");
+    completion.setAttribute("aria-atomic", "true");
+    completion.style.cssText = status.style.cssText;
+    this.data.completionRegion = completion;
+
     // Associate static keyboard guidance with the input, preserving existing descriptions.
     const keyboardHint = document.createElement("div");
     keyboardHint.id = this.data.input.id + "-postcoder-keyboard-hint";
+    // Hint should be available through aria-describedby, not while scrolling the page
+    keyboardHint.setAttribute("aria-hidden", "true");
     keyboardHint.textContent =
       "Start typing, then use the up and down arrow keys to browse suggestions and press Enter to select. Press Escape to close suggestions.";
     keyboardHint.style.cssText = status.style.cssText;
@@ -189,12 +198,13 @@ class PostcoderAddressAutocomplete {
       wrapper,
       this.data.input.nextSibling
     );
-    wrapper.appendChild(this.data.input);
 
-    // Put the suggestions, keyboard hint & aria-live region in the wrapper with the input
-    wrapper.appendChild(suggestionsElement);
-    wrapper.appendChild(keyboardHint);
+    // Put the suggestions, keyboard hint & aria-live regions in the wrapper with the input
     wrapper.appendChild(status);
+    wrapper.appendChild(completion);
+    wrapper.appendChild(keyboardHint);
+    wrapper.appendChild(this.data.input);
+    wrapper.appendChild(suggestionsElement);
 
     // Add click event listener to the document, to hide the suggestions when clicked away
     document.body.addEventListener("click", (e: MouseEvent) => {
